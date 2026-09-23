@@ -1,0 +1,26 @@
+{
+  "name": "muse-code-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Unofficial desktop command center for Muse Code",
+  "workspaces": [
+    "apps/desktop",
+    "apps/website",
+    "packages/muse-bridge"
+  ],
+  "scripts": {
+    "dev:website": "npm run dev -w @muse/website",
+    "build:website": "npm run build -w @muse/website",
+    "test": "node --test tests",
+    "build:bridge": "npm run build -w @muse/bridge",
+    "dev": "npm run build:bridge && npm run tauri -w muse-code-desktop -- dev",
+    "dev:ui": "npm run dev -w muse-code-desktop",
+    "build": "npm run build:bridge && npm run tauri -w muse-code-desktop -- build",
+    "preview": "npm run build:bridge && npm run preview -w muse-code-desktop",
+    "icons": "./node_modules/.bin/tauri icon apps/desktop/public/spark.svg",
+    "postinstall": "node node_modules/esbuild/install.js",
+    "test:ui": "npm run test:ui -w muse-code-desktop",
+    "check:versions": "node scripts/check-versions.mjs",
+    "verify": "npm run check:versions && npm run typecheck -w @muse/bridge && npm run typecheck -w muse-code-desktop && npm test && npm run test:ui && node scripts/check-a11y.mjs && node scripts/check-contrast.mjs && npm audit --audit-level=high && npm run build:bridge && npm run build -w muse-code-desktop && cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml"
+  }
+}

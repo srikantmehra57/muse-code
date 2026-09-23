@@ -1,0 +1,72 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # generate_context! bakes frontendDist at compile time, so the web
+      # bundle must exist before cargo builds — even for tests.
+      - name: Build web + bridge bundles
+        run: npm ci && npm run build:bridge && npm run build -w muse-code-desktop
+      - name: Node tests
+        run: npm test
+      - name: DOM component tests
+        run: npm run test:ui
+      - name: Bridge typecheck
+        run: npm run typecheck -w @muse/bridge
+      - name: Desktop typecheck
+        run: npm run typecheck -w muse-code-desktop
+      # `docs` advertises these as release gates; CI has to actually run them.
+      - name: Version manifests agree (REL-015)
+        run: npm run check:versions
+      - name: Dependency advisories
+        run: npm audit --audit-level=high
+      - name: Colour contrast (WCAG AA)
+        run: node scripts/check-contrast.mjs
+      - name: Accessibility sweep
+        run: node scripts/check-a11y.mjs
+      - name: Native tests (incl. mock-app shell e2e)
+        run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
+
+  package-macos:
+    name: package (macos, unsigned)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: npm ci
+      - name: Build unsigned .app
+        run: npm run build
+      # Clean-host approximation: the packaged sidecar launches with a scrubbed
+      # PATH (no ambient Node, no credentials), the bundled bridge digest must
+      # be baked into the binary (script-swap rejection), and the sidecar must
+      # be a regular file.
+      - name: Verify packaged bundle
+        run: node scripts/verify-macos-package.mjs
+      - name: Upload unsigned bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: muse-code-desktop-macos-unsigned
+          path: "apps/desktop/src-tauri/target/release/bundle/macos/Muse Code.app"

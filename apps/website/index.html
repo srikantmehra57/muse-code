@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-accent="blue">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#060608" />
+    <meta
+      name="description"
+      content="Muse Code Desktop is an open-source desktop app for Muse and other coding agent CLIs like OpenCode, Grok and Gemini CLI."
+    />
+    <link rel="icon" type="image/svg+xml" href="/spark.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link href="https://api.fontshare.com/v2/css?f[]=array@400&f[]=general-sans@300,400,500,600,300i,400i&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <title>Muse Code Desktop</title>
+    <script>
+      // Apply the stored theme before first paint (localStorage muse-site-theme).
+      (function () {
+        var stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem("muse-site-theme") || "null");
+        } catch (e) {}
+        var theme =
+          stored && stored.theme
+            ? stored.theme
+            : window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+        var accent = "blue"; // the site keeps the default accent; the themes section only restyles the preview
+        var root = document.documentElement;
+        root.dataset.theme = theme;
+        root.dataset.accent = accent;
+        root.classList.add("js");
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", theme === "light" ? "#F4F4F1" : "#060608");
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- ambient layers -->
+    <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div id="scene" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="cursor" id="cursor" aria-hidden="true"><i class="cursor-dot"></i><i class="cursor-ring"></i></div>
+
+    <!-- nav -->
+    <header class="nav" id="nav">
+      <div class="nav-pill">
+        <a class="brand" href="#top" aria-label="Muse Code — back to top">
+          <img src="/spark.svg" width="24" height="24" alt="" />
+          <span>muse<span class="brand-dim">code</span></span>
+        </a>
+        <div class="nav-mid">
+        <nav class="nav-links" aria-label="Sections">
+          <a href="#room" data-nav="room">Tour</a>
+          <a href="#features" data-nav="features">Features</a>
+          <a href="#agents" data-nav="agents">Agents</a>
+          <a href="#dial" data-nav="dial">Effort</a>
+          <a href="#run" data-nav="run">Run</a>
+          <a href="#themes" data-nav="themes">Themes</a>
+        </nav>
+        <nav class="nav-tour" aria-label="Tour stops" id="nav-tour">
+          <span class="nav-tour-thumb" aria-hidden="true"></span>
+          <button type="button" data-stop="1"><i>01</i>Threads</button>
+          <button type="button" data-stop="2"><i>02</i>Timeline</button>
+          <button type="button" data-stop="3"><i>03</i>Composer</button>
+          <button type="button" data-stop="4"><i>04</i>Changes</button>
+        </nav>
+        </div>
+        <button type="button" class="nav-icon theme-toggle" id="theme-toggle" aria-label="Switch to light theme">
+          <svg class="ico-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
+          <svg class="ico-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        </button>
+        <a class="nav-icon nav-gh" href="https://github.com/srikantmehra57/muse-code" target="_blank" rel="noreferrer" aria-label="Source on GitHub">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+        <a class="btn btn-primary btn-sm magnetic" href="#install">Download</a>
+        <span class="nav-progress" aria-hidden="true"><i id="nav-progress"></i></span>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ═════════ Hero ═════════ -->
+      <section class="hero" id="top" data-scene="0 0 0.74 0.8 1 0.25" aria-labelledby="hero-title">
+        <div class="hero-halo" aria-hidden="true"></div>
+        <div class="hero-grid">
+          <h1 id="hero-title" class="hero-title" data-split>
+            <span class="line">Muse Code <em class="grad">Desktop</em></span>
+          </h1>
+          <div class="hero-side">
+            <p class="lede" data-reveal>
+              A desktop app for Muse and other coding agents like OpenCode, Grok and Gemini CLI. Chat with your agent,
+              approve commands and review changes in one window.
+            </p>
+            <div class="actions" data-reveal>
+              <a class="btn btn-primary magnetic" href="https://github.com/srikantmehra57/muse-code/releases/download/v0.1.0/Muse-Code_0.1.0_aarch64.dmg">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.47.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.76 2.28-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74s1.78.74 3 .72c1.24-.02 2.02-1.12 2.78-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.69zM14.1 5.84c.63-.77 1.06-1.83.94-2.89-.91.04-2.01.61-2.66 1.37-.58.67-1.1 1.76-.96 2.8 1.01.08 2.05-.51 2.68-1.28z"/></svg>
+                Download for macOS
+              </a>
+              <a class="btn btn-ghost magnetic" href="https://github.com/srikantmehra57/muse-code" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </div>
+
+        <figure class="hero-video" data-reveal style="--d: 3">
+          <div class="window-glow" aria-hidden="true"></div>
+          <div class="window-frame">
+            <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>Muse Code</span></div>
+            <div class="hero-video-view">
+              <video
+                id="launch-video"
+                src="/video/launch.mp4"
+                poster="/video/launch-poster.webp"
+                width="1920"
+                height="1080"
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                aria-label="A 22-second tour of Muse Code Desktop: a prompt runs, a terminal command is approved, reasoning effort is set to Max, and other agent CLIs are shown."
+              ></video>
+              <button type="button" class="video-sound" id="launch-sound" aria-pressed="false">
+                <svg class="ico-muted" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>
+                <svg class="ico-sound" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+                <span id="launch-sound-label">Sound on</span>
+              </button>
+            </div>
+          </div>
+        </figure>
+
+        <div class="hero-foot">
+          <dl class="facts" data-reveal>
+            <div><dt>Built with</dt><dd>Tauri 2</dd></div>
+            <div><dt>Runs on</dt><dd>macOS and Windows</dd></div>
+            <div><dt>License</dt><dd>MIT</dd></div>
+          </dl>
+        </div>
+
+      </section>
+
+      <!-- ═════════ 01 The room — pinned tour ═════════ -->
+      <section class="room" id="room" data-scene="1 0 0.1 1 0.85 0.2" aria-labelledby="room-title">
+        <header class="sec-head">
+          <h2 id="room-title" class="sec-title" data-split>Inside the app</h2>
+          <p class="lede center" data-reveal>Scroll to see each part of the app.</p>
+        </header>
+
+        <div class="tour" id="tour">
+          <div class="tour-sticky">
+            <figure class="window" id="window">
+              <div class="window-glow" aria-hidden="true"></div>
+              <div class="window-frame">
+                <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>Muse Code</span></div>
+                <div class="window-view" id="window-view">
+                  <div class="window-zoom" id="window-zoom">
+                    <img id="shot-a" decoding="async" src="/shots/app-dark-blue.webp" srcset="/shots/app-dark-blue@1x.webp 1440w, /shots/app-dark-blue.webp 2880w" sizes="(max-width: 1200px) 100vw, 1200px" width="1440" height="900" alt="The Muse Code desktop app: workspace threads on the left, an agent run in the middle, and the changes review dock on the right." />
+                    <img id="shot-b" decoding="async" src="/shots/app-dark-blue.webp" width="1440" height="900" alt="" aria-hidden="true" />
+                    <span class="spot" id="spot" aria-hidden="true"></span>
+                  </div>
+                  <div class="callout glass" id="callout" aria-hidden="true">
+                    <span class="callout-num mono" id="callout-num">01 / 04</span>
+                    <h3 id="callout-title"></h3>
+                    <p id="callout-text"></p>
+                  </div>
+                </div>
+              </div>
+            </figure>
+
+            <div class="tour-card glass" id="tour-card">
+              <div class="tour-meta mono"><span id="tour-num">00</span><span class="tour-total">/ 04</span><span class="tour-bar"><i id="tour-bar"></i></span></div>
+              <div class="tour-copy" id="tour-copy" aria-live="polite">
+                <h3>Overview</h3>
+                <p>Workspaces on the left, the chat in the middle, changed files on the right.</p>
+              </div>
+              <div class="tour-steps" role="group" aria-label="Tour stops">
+                <button type="button" data-stop="1">Threads</button>
+                <button type="button" data-stop="2">Timeline</button>
+                <button type="button" data-stop="3">Composer</button>
+                <button type="button" data-stop="4">Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════ 02 Details — bento ═════════ -->
+      <section class="features" id="features" data-scene="2 1.6 0 1 0.6 0.2" aria-labelledby="features-title">
+        <header class="sec-head">
+          <h2 id="features-title" class="sec-title" data-split>Features</h2>
+        </header>
+
+        <div class="bento">
+          <article class="card card-wide" data-reveal>
+            <div class="card-copy">
+              <h3>Native app</h3>
+              <p>Built with Tauri on your system's webview, so it doesn't bundle a browser. It runs the official CLI in the background.</p>
+            </div>
+            <div class="pipe" aria-label="React UI, then Tauri native shell, then muse-bridge, then muse serve">
+              <span class="pipe-node">React UI</span><span class="pipe-link"><i></i></span>
+              <span class="pipe-node">Tauri 2</span><span class="pipe-link"><i></i></span>
+              <span class="pipe-node">muse-bridge</span><span class="pipe-link"><i></i></span>
+              <span class="pipe-node pipe-end">muse serve</span>
+            </div>
+          </article>
+
+          <article class="card" data-reveal>
+            <div class="mini-approval" aria-hidden="true">
+              <p class="mini-q">Allow Terminal?</p>
+              <code>git push origin main</code>
+              <div class="mini-btns"><span>Deny</span><span class="on">Allow once</span></div>
+            </div>
+            <div class="card-copy">
+              <h3>Approvals</h3>
+              <p>See the exact command before it runs. Allow it once, for the session, or deny it.</p>
+            </div>
+          </article>
+
+          <article class="card" data-reveal>
+            <div class="mini-key" aria-hidden="true">
+              <span class="mini-lock"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+              <code>META_API_KEY <span class="mask">••••••••••••</span>3f9a</code>
+            </div>
+            <div class="card-copy">
+              <h3>Secure API keys</h3>
+              <p>Keys are stored in Keychain on macOS, Credential Manager on Windows and Secret Service on Linux.</p>
+            </div>
+          </article>
+
+          <article class="card" data-reveal>
+            <div class="mini-diff" aria-hidden="true">
+              <p class="d-file">styles.css <span class="d-add">+12</span> <span class="d-del">−3</span></p>
+              <p class="d-del-line">- grid-template-columns: 1fr;</p>
+              <p class="d-add-line">+ grid-template-columns: 319px 1fr 360px;</p>
+              <p class="d-add-line">+ background: var(--bg-elevated);</p>
+            </div>
+            <div class="card-copy">
+              <h3>Diffs</h3>
+              <p>Review changed files next to the chat, then commit or revert.</p>
+            </div>
+          </article>
+
+          <article class="card" data-reveal>
+            <div class="mini-chips" aria-hidden="true">
+              <span>@App.tsx</span><span>@styles.css</span><span class="img">▣ layout.png</span><span>@README.md</span>
+            </div>
+            <div class="card-copy">
+              <h3>Attachments</h3>
+              <p>Add files and images by dragging them in, using the file picker, or typing @.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═════════ Bring your own agent ═════════ -->
+      <section class="agents" id="agents" data-scene="5 0 -0.05 1.05 0.3 0.3" aria-labelledby="agents-title">
+        <header class="sec-head">
+          <h2 id="agents-title" class="sec-title" data-split>Use your own agent</h2>
+          <p class="lede center" data-reveal>Muse is the default. The app also works with other coding agent CLIs installed on your computer, using your own accounts.</p>
+        </header>
+
+        <div class="orbit" data-reveal>
+          <svg class="orbit-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" id="orbit-lines"></svg>
+          <div class="orbit-hub" aria-hidden="true">
+            <span class="orbit-ring"></span>
+            <img src="/spark.svg" width="44" height="44" alt="" />
+            <span class="orbit-hub-name">Muse Code<br />Desktop</span>
+          </div>
+          <ul class="orbit-nodes" aria-label="Supported agent CLIs">
+            <li class="orbit-node" style="--a:0"><span class="agent-ico"><img src="/spark.svg" width="18" height="18" alt="" /></span><span class="agent-name">Muse</span><span class="agent-badge b-default">Default</span></li>
+            <li class="orbit-node" style="--a:1"><span class="agent-ico"><img src="/agents/opencode.svg" width="18" height="18" alt="" /></span><span class="agent-name">OpenCode</span><span class="agent-badge b-ok">Supported</span></li>
+            <li class="orbit-node" style="--a:2"><span class="agent-ico"><img src="/agents/grok.svg" width="18" height="18" alt="" /></span><span class="agent-name">Grok</span><span class="agent-badge b-ok">Supported</span></li>
+            <li class="orbit-node" style="--a:3"><span class="agent-ico"><img src="/agents/gemini.svg" width="18" height="18" alt="" /></span><span class="agent-name">Gemini CLI</span><span class="agent-badge b-exp">Experimental</span></li>
+            <li class="orbit-node" style="--a:4"><span class="agent-ico"><img src="/agents/qwen.svg" width="18" height="18" alt="" /></span><span class="agent-name">Qwen Code</span><span class="agent-badge b-exp">Experimental</span></li>
+            <li class="orbit-node" style="--a:5"><span class="agent-ico"><b>Go</b></span><span class="agent-name">Goose</span><span class="agent-badge b-exp">Experimental</span></li>
+          </ul>
+        </div>
+
+        <div class="agent-points">
+          <article class="card agent-point" data-reveal>
+            <h3>Your own API key</h3>
+            <p>Sign in with a Muse Code subscription or add your own <code>META_API_KEY</code>. It's stored in your system keychain.</p>
+          </article>
+          <article class="card agent-point" data-reveal>
+            <h3>Other CLIs</h3>
+            <p>OpenCode and Grok are fully supported. Gemini CLI, Qwen Code and Goose are experimental. Install one, sign in, then click Rescan.</p>
+          </article>
+          <article class="card agent-point" data-reveal>
+            <h3>Switch anytime</h3>
+            <p>Change the agent from the composer. Your chat history stays in the thread.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═════════ 03 The dial ═════════ -->
+      <section class="dial" id="dial" data-scene="3 0 0 1 1 1" aria-labelledby="dial-title">
+        <header class="sec-head">
+          <h2 id="dial-title" class="sec-title" data-split>Reasoning effort</h2>
+          <p class="lede center" data-reveal>Choose how much the model thinks before it answers, from None to Max. Try the slider.</p>
+        </header>
+
+        <div class="dial-stage">
+          <div class="effort-pop glass" id="effort-pop" data-reveal>
+            <div class="effort-head">
+              <span class="mono">Reasoning effort</span>
+              <span class="mono dim">Muse Spark 1.3</span>
+            </div>
+            <div class="effort-readout" aria-live="polite">
+              <span class="effort-name" id="effort-name">High</span>
+              <span class="effort-blurb" id="effort-blurb">Thinks it through before acting</span>
+            </div>
+            <div
+              class="scrubber"
+              id="scrubber"
+              role="slider"
+              tabindex="0"
+              aria-label="Reasoning effort"
+              aria-valuemin="0"
+              aria-valuemax="6"
+              aria-valuenow="4"
+              aria-valuetext="High"
+            >
+              <div class="scrubber-ticks" id="scrubber-ticks" aria-hidden="true"></div>
+              <div class="scrubber-rail" aria-hidden="true">
+                <span class="scrubber-fill"></span>
+                <span class="scrubber-handle"></span>
+              </div>
+            </div>
+            <div class="scrubber-labels" id="scrubber-labels" aria-hidden="true"></div>
+            <div class="effort-foot mono"><span>Faster · cheaper</span><span>Deeper · slower</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════ 04 A run ═════════ -->
+      <section class="run" id="run" data-scene="4 -2.35 0 1 0.75 0.3" aria-labelledby="run-title">
+        <div class="run-wrap" id="run-wrap">
+          <div class="run-sticky">
+            <header class="run-head">
+              <h2 id="run-title" class="sec-title" data-split>A sample run</h2>
+              <p class="lede">Scroll to follow an example task from prompt to finished change.</p>
+              <p class="run-count mono"><span id="run-count">0</span> / 8 steps</p>
+            </header>
+
+            <div class="run-panel glass">
+              <div class="run-panel-bar mono" aria-hidden="true"><span class="live"></span>Thread · command-center layout</div>
+              <div class="run-col" id="run-col">
+                <span class="run-rail" aria-hidden="true"><i id="run-rail-fill"></i></span>
+
+                <div class="run-item" data-step="0">
+                  <div class="run-user">
+                    <span class="run-ref">App.tsx</span>
+                    <p>Add a dark command-center layout for the desktop app.</p>
+                  </div>
+                </div>
+                <div class="run-item" data-step="1">
+                  <p class="run-reason">Inspect the shell, then introduce a 319px sidebar, a conversation surface, and a review inspector.</p>
+                </div>
+                <div class="run-item" data-step="2">
+                  <div class="run-tool"><span class="run-tool-name">codebase_search</span><span class="run-tool-arg">"sidebar conversation layout"</span><span class="run-tool-ms">840 ms</span><span class="run-ok">✓</span></div>
+                </div>
+                <div class="run-item" data-step="3">
+                  <div class="run-tool"><span class="run-tool-name">read_file</span><span class="run-tool-arg">apps/desktop/src/App.tsx</span><span class="run-tool-ms">120 ms</span><span class="run-ok">✓</span></div>
+                </div>
+                <div class="run-item" data-step="4">
+                  <div class="run-tool"><span class="run-tool-name">edit_file</span><span class="run-tool-arg">apps/desktop/src/styles.css</span><span class="run-tool-ms">640 ms</span><span class="run-ok">✓</span></div>
+                </div>
+                <div class="run-item" data-step="5">
+                  <div class="approval">
+                    <p class="approval-q">Allow Terminal?</p>
+                    <pre class="cmd">muse serve --workspace .</pre>
+                    <div class="choices">
+                      <button type="button" class="choice" data-decision="Denied">Deny</button>
+                      <span class="grow"></span>
+                      <button type="button" class="choice choice-primary" data-decision="Allowed once">Allow once</button>
+                      <button type="button" class="choice" data-decision="Allowed for session">Allow for session</button>
+                    </div>
+                    <p class="approval-receipt mono" id="approval-receipt" role="status"></p>
+                  </div>
+                </div>
+                <div class="run-item" data-step="6">
+                  <div class="run-tool"><span class="run-tool-name">bash</span><span class="run-tool-arg">npm test --silent</span><span class="run-tool-ms">exit 0 · 2.1 s</span><span class="run-ok">✓</span></div>
+                  <p class="run-out">28 tests passed</p>
+                </div>
+                <div class="run-item" data-step="7">
+                  <p class="run-agent">Implemented the command-center shell: sidebar threads, an agent timeline, and a per-file review dock.</p>
+                  <ul class="run-plan">
+                    <li>Inspect the shell</li>
+                    <li>Introduce the sidebar and review inspector</li>
+                    <li>Wire Muse sessions</li>
+                  </ul>
+                  <p class="run-receipt"><span class="pill">✓ Changed 1 file</span><span class="pill dim">styles.css</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════ 05 Themes (product preview) ═════════ -->
+      <section class="themes" id="themes" data-scene="5 -2.6 0 0.8 0.2 0.3" aria-labelledby="themes-title">
+        <div class="themes-inner">
+          <div class="themes-copy">
+            <h2 id="themes-title" class="themes-title" data-split>Themes</h2>
+            <p class="themes-lede" data-reveal>Seven accent colors, each in light and dark. Pick one to preview it.</p>
+            <div class="theme-controls" data-reveal>
+              <div class="seg seg-sm" role="radiogroup" aria-label="Preview theme" id="theme-seg">
+                <span class="seg-thumb" aria-hidden="true"></span>
+                <button type="button" role="radio" data-theme-pick="dark" aria-checked="true">Dark</button>
+                <button type="button" role="radio" data-theme-pick="light" aria-checked="false">Light</button>
+              </div>
+              <div class="swatches" role="radiogroup" aria-label="Preview accent color" id="swatches"></div>
+            </div>
+            <p class="accent-name mono" data-reveal><span class="accent-dot" aria-hidden="true"></span><span id="accent-name" aria-live="polite">Glacier Mist</span></p>
+          </div>
+          <figure class="monitor" id="monitor" data-reveal>
+            <div class="monitor-glow" aria-hidden="true"></div>
+            <div class="monitor-frame">
+              <img id="theme-a" decoding="async" loading="lazy" src="/shots/app-dark-blue.webp" srcset="/shots/app-dark-blue@1x.webp 1440w, /shots/app-dark-blue.webp 2880w" sizes="(max-width: 860px) 100vw, 720px" width="1440" height="900" alt="The Muse Code app in the selected theme and accent." />
+              <img id="theme-b" decoding="async" src="/shots/app-dark-blue.webp" width="1440" height="900" alt="" aria-hidden="true" />
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <!-- ═════════ 06 Install ═════════ -->
+      <section class="install" id="install" data-scene="0 0 0.1 1.3 0.85 0.3" aria-labelledby="install-title">
+        <header class="sec-head">
+          <h2 id="install-title" class="sec-title" data-split>Get started</h2>
+        </header>
+
+        <div class="steps">
+          <article class="card step" data-reveal>
+            <p class="step-num" aria-hidden="true">01</p>
+            <h3>Install the Muse CLI</h3>
+            <div class="seg seg-sm" role="group" aria-label="Installation platform" id="platform-seg">
+              <span class="seg-thumb" aria-hidden="true"></span>
+              <button type="button" data-platform="posix" aria-pressed="true">macOS / Linux</button>
+              <button type="button" data-platform="windows" aria-pressed="false">Windows</button>
+            </div>
+            <div class="terminal">
+              <div class="terminal-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="terminal-body">
+                <span class="prompt" aria-hidden="true">$</span>
+                <code id="install-command">curl -fsSL https://dev.meta.ai/install.sh | sh</code>
+                <button type="button" class="copy-btn" id="copy-command">Copy</button>
+              </div>
+            </div>
+            <p class="copy-status mono" id="copy-status" role="status"></p>
+            <p class="note">Then run <code>muse</code> and type <code>/login</code>, or set <code>META_API_KEY</code>.</p>
+          </article>
+
+          <article class="card step" data-reveal>
+            <p class="step-num" aria-hidden="true">02</p>
+            <h3>Download the app</h3>
+            <p class="note">Beta for Apple silicon Macs. It isn't notarized yet, so the first time, right-click the app and choose Open.</p>
+            <div class="actions">
+              <a class="btn btn-primary magnetic" href="https://github.com/srikantmehra57/muse-code/releases/download/v0.1.0/Muse-Code_0.1.0_aarch64.dmg">Download for macOS <span aria-hidden="true">↓</span></a>
+              <a class="btn btn-ghost magnetic" href="https://github.com/srikantmehra57/muse-code#develop" target="_blank" rel="noreferrer">Build from source <span aria-hidden="true">↗</span></a>
+            </div>
+            <p class="req mono">Requires Node 20+, the <code>muse</code> CLI and git</p>
+          </article>
+        </div>
+
+        <div class="finale">
+          <h2 class="finale-title" data-split>Free and <em class="grad">open source</em></h2>
+          <a class="btn btn-primary btn-lg magnetic" href="https://github.com/srikantmehra57/muse-code/releases/download/v0.1.0/Muse-Code_0.1.0_aarch64.dmg">Download for macOS <span aria-hidden="true">↓</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer" data-scene="0 0 -1.35 1.7 0.5 0.3">
+      <div class="footer-row">
+        <p>An independent desktop client for Muse Code. Not affiliated with Meta.</p>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="https://github.com/srikantmehra57/muse-code" target="_blank" rel="noreferrer">Source ↗</a>
+          <a href="https://github.com/srikantmehra57/muse-code/releases" target="_blank" rel="noreferrer">Releases ↗</a>
+          <a href="https://github.com/srikantmehra57/muse-code/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License ↗</a>
+          <a href="#top">Back to top ↑</a>
+        </nav>
+      </div>
+      <p class="wordmark" aria-hidden="true">muse code</p>
+    </footer>
+
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

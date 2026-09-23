@@ -1,0 +1,59 @@
+[package]
+name = "muse-code-desktop"
+version = "0.1.0"
+description = "Desktop command center for Muse Code"
+authors = ["Muse Code Desktop"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "muse_code_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+# The crate defines no doctests, but `cargo test` still compiles one through
+# rustdoc — pure overhead here, and load-flaky (intermittent E0463 "can't find
+# crate" under concurrent builds) so the documented native test gate can fail
+# with no code regression. Unit and integration tests still run.
+doctest = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+sha2 = "0.10"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-store = "2"
+tauri-plugin-notification = "2"
+base64 = "0.22"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+tokio = { version = "1", features = ["io-util", "macros", "process", "rt-multi-thread", "sync", "time"] }
+which = "7"
+dirs = "6"
+uuid = { version = "1", features = ["v4"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3.6.3", features = ["apple-native"] }
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSHapticFeedback"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+keyring = { version = "3.6.3", features = ["windows-native"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "3.6.3", features = ["sync-secret-service", "crypto-rust"] }
+
+# Production embeds the UI. `tauri dev` passes --no-default-features so it can
+# still load the Vite server. A plain `cargo build --release` must not ship in
+# dev mode or the window stays blank (it would wait for localhost:1420).
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[dev-dependencies]
+# `tauri::test` (mock_app/MockRuntime) drives the native-shell e2e without a
+# window server; the feature only lands in test builds.
+tauri = { version = "2", features = ["test"] }

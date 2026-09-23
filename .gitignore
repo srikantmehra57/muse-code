@@ -1,0 +1,21 @@
+node_modules
+dist
+.tooling
+target
+.DS_Store
+*.log
+.vscode
+.idea
+apps/desktop/src-tauri/gen
+apps/desktop/src-tauri/target
+apps/desktop/src-tauri/binaries
+*.local
+.cache
+
+# Internal product, audit, and release-working documents
+/OVERHAUL_PLAN.md
+/PRODUCTION_AUDIT.md
+/PRODUCTION_READINESS.md
+/PRODUCT_AUDIT.md
+/design-qa.md
+/docs/muse-desktop-audit/
